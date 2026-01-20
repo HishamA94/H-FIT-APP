@@ -3,228 +3,82 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مدفوعات Pi Network</title>
+    <title>H-FIT | تدريب ذكي ومخصص</title>
     
-    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
     <style>
-        :root {
-            --pi-purple: #5e2a84;
-            --pi-gold: #ffa500;
-            --bg-color: #f0f2f5;
+        body { font-family: 'Cairo', sans-serif; background-color: #111; color: white; }
+        .hfit-purple { color: #5e2a84; }
+        .bg-hfit-purple { background-color: #5e2a84; }
+        .hero-bg {
+            background-image: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.9)), url('https://images.unsplash.com/photo-1517836357463-d25dfeac3438?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
         }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: #333;
-        }
-
-        .payment-card {
-            background: white;
-            padding: 30px;
-            border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .pi-logo {
-            width: 70px;
-            height: 70px;
-            background: var(--pi-purple);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 20px;
-        }
-
-        .pi-logo span {
-            color: white;
-            font-size: 40px;
-            font-weight: bold;
-        }
-
-        h2 {
-            margin: 10px 0;
-            color: var(--pi-purple);
-        }
-
-        .user-info {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            color: #666;
-        }
-
-        #username {
-            font-weight: bold;
-            color: var(--pi-purple);
-        }
-
-        .price-box {
-            background: #fff9e6;
-            border: 2px solid var(--pi-gold);
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-        }
-
-        .amount {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .currency {
-            font-size: 1.2rem;
-            color: var(--pi-gold);
-            font-weight: bold;
-        }
-
-        .btn-pay {
-            background: var(--pi-purple);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(94, 42, 132, 0.3);
-        }
-
-        .btn-pay:hover:not(:disabled) {
-            background: #4a1f69;
-            transform: translateY(-2px);
-        }
-
-        .btn-pay:disabled {
-            background: #ccc;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        .status {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            min-height: 20px;
-        }
-
-        .success { color: green; }
-        .error { color: red; }
     </style>
 </head>
-<body>
+<body class="antialiased">
 
-    <div class="payment-card">
-        <div class="pi-logo"><span>π</span></div>
-        
-        <h2>بوابة مدفوعات Pi</h2>
-        
-        <div class="user-info">
-            مرحباً، <span id="username">جاري التعرف عليك...</span>
+    <nav class="flex justify-between items-center p-6 max-w-7xl mx-auto">
+        <div class="text-3xl font-black tracking-tighter">H-FIT<span class="text-orange-500">.</span></div>
+        <div class="hidden md:flex gap-6 text-gray-300">
+            <a href="#" class="hover:text-white transition">التمارين</a>
+            <a href="#" class="hover:text-white transition">المدونة</a>
+            <a href="#" class="hover:text-white transition">عن التطبيق</a>
         </div>
+        <button onclick="window.location.href='app.html'" class="bg-white text-black px-6 py-2 rounded-full font-bold hover:bg-gray-200 transition">
+            ابدأ التمرين
+        </button>
+    </nav>
 
-        <div class="price-box">
-            <div class="amount">1.0</div>
-            <div class="currency">Pi Network</div>
-        </div>
-
-        <button id="pay-button" class="btn-pay" disabled>تفعيل الدفع</button>
+    <header class="hero-bg min-h-[80vh] flex flex-col justify-center items-center text-center px-4">
+        <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight">
+            تمرن بذكاء<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-orange-500">مع H-FIT</span>
+        </h1>
+        <p class="text-xl md:text-2xl text-gray-300 max-w-2xl mb-10">
+            خوارزمية ذكية تصمم لك تمارين المقاومة بناءً على معداتك، مستوى تعافيك، وأهدافك الشخصية.
+        </p>
         
-        <div id="status-msg" class="status"></div>
-    </div>
+        <div class="flex flex-col md:flex-row gap-4 w-full max-w-md">
+            <button onclick="window.location.href='app.html'" class="bg-hfit-purple text-white py-4 px-8 rounded-xl font-bold text-lg flex-1 hover:opacity-90 transition shadow-lg shadow-purple-900/50">
+                جرب التطبيق الآن (مجاناً)
+            </button>
+            <button class="border-2 border-gray-600 text-white py-4 px-8 rounded-xl font-bold text-lg flex-1 hover:border-white transition">
+                كيف يعمل؟
+            </button>
+        </div>
+        
+        <div class="mt-12 flex items-center gap-2 text-gray-400 text-sm">
+            <span class="w-2 h-2 bg-green-500 rounded-full"></span>
+            متوافق مع Pi Network Browser
+        </div>
+    </header>
 
-    <script>
-        const Pi = window.Pi;
-        const statusMsg = document.getElementById('status-msg');
-        const payButton = document.getElementById('pay-button');
+    <section class="py-20 bg-black">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-3 gap-10">
+            <div class="p-6 bg-gray-900 rounded-2xl border border-gray-800">
+                <div class="text-4xl mb-4">🤖</div>
+                <h3 class="text-xl font-bold mb-2">ذكاء اصطناعي</h3>
+                <p class="text-gray-400">يحلل تمارينك السابقة ويقترح الأوزان والتكرارات المناسبة لضمان التطور المستمر.</p>
+            </div>
+            <div class="p-6 bg-gray-900 rounded-2xl border border-gray-800">
+                <div class="text-4xl mb-4">🏋️</div>
+                <h3 class="text-xl font-bold mb-2">تخصيص المعدات</h3>
+                <p class="text-gray-400">سواء كنت في الجيم أو المنزل، حدد المعدات المتاحة وسنقوم بإنشاء الخطة المناسبة.</p>
+            </div>
+            <div class="p-6 bg-gray-900 rounded-2xl border border-gray-800">
+                <div class="text-4xl mb-4">π</div>
+                <h3 class="text-xl font-bold mb-2">الدفع عبر Pi</h3>
+                <p class="text-gray-400">اشترك في الباقات المتقدمة بسهولة وسرعة باستخدام عملة Pi Network.</p>
+            </div>
+        </div>
+    </section>
 
-        // 1. تهيئة الـ SDK (Sandbox False للبيئة الحقيقية)
-        Pi.init({ version: "2.0", sandbox: false });
-
-        // 2. تسجيل الدخول والتعرف على المستخدم
-        async function authenticateUser() {
-            try {
-                const scopes = ['username', 'payments'];
-                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                
-                document.getElementById('username').innerText = auth.user.username;
-                payButton.disabled = false;
-                showStatus("جاهز لإتمام العملية", "success");
-            } catch (err) {
-                console.error(err);
-                showStatus("فشل الاتصال بـ Pi SDK", "error");
-                document.getElementById('username').innerText = "زائر";
-            }
-        }
-
-        // 3. معالجة المدفوعات العالقة (مهم جداً لسياسة Pi)
-        async function onIncompletePaymentFound(payment) {
-            showStatus("يوجد عملية سابقة معلقة، جاري المعالجة...", "error");
-            // هنا يمكنك إرسال payment.identifier إلى السيرفر لإكمالها
-        }
-
-        // 4. وظيفة الدفع عند الضغط على الزر
-        payButton.addEventListener('click', () => {
-            const paymentData = {
-                amount: 1.0,
-                memo: "شراء منتج تجريبي", // الوصف الذي يظهر للمستخدم
-                metadata: { orderId: "12345" } 
-            };
-
-            const callbacks = {
-                onReadyForServerApproval: (paymentId) => {
-                    showStatus("جاري انتظار موافقة السيرفر...", "");
-                    // استدعاء ملف الـ approve الذي أنشأته في Netlify
-                    fetch('/api/pi/approve', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId })
-                    });
-                },
-                onReadyForServerCompletion: (paymentId, txid) => {
-                    showStatus("جاري تأكيد المعاملة على البلوكشين...", "success");
-                    // استدعاء ملف الـ complete الذي أنشأته في Netlify
-                    fetch('/api/pi/complete', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ paymentId, txid })
-                    }).then(res => {
-                        if (res.ok) {
-                            showStatus("تمت عملية الدفع بنجاح! شكرًا لك.", "success");
-                            payButton.innerText = "تم الدفع ✅";
-                            payButton.disabled = true;
-                        }
-                    });
-                },
-                onCancel: (paymentId) => {
-                    showStatus("تم إلغاء العملية من قبل المستخدم", "error");
-                },
-                onError: (error, payment) => {
-                    showStatus("حدث خطأ أثناء الدفع", "error");
-                    console.error(error);
-                }
-            };
-
-            Pi.createPayment(paymentData, callbacks);
-        });
-
-        function showStatus(msg, type) {
-            statusMsg.innerText = msg;
-            statusMsg.className = "status " + type;
-        }
-
-        // بدء التشغيل
-        authenticateUser();
-    </script>
+    <script src="js/supabase-config.js"></script>
 </body>
 </html>
