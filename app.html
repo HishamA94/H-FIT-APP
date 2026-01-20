@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>H-FIT | التمارين</title>
+    <title>H-FIT | التمارين والاشتراك</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -14,7 +14,6 @@
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
         .hfit-purple { color: #5e2a84; }
         .bg-hfit-purple { background-color: #5e2a84; }
-        /* إخفاء شريط التمرير للشكل الجمالي */
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
     </style>
@@ -47,94 +46,88 @@
         </div>
     </div>
 
-    <div class="px-4 mt-2">
+    <div class="px-4 mb-6">
+        <div class="bg-gradient-to-r from-yellow-400 to-orange-500 rounded-2xl p-4 text-white shadow-lg flex justify-between items-center border border-yellow-300">
+            <div>
+                <h3 class="font-bold text-lg">النسخة الاحترافية 👑</h3>
+                <p class="text-white/90 text-sm italic">افتح 500+ تمرين وخطط مخصصة</p>
+            </div>
+            <button onclick="window.location.href='payment.html'" class="bg-white text-orange-600 font-bold py-2.5 px-5 rounded-xl shadow-sm hover:bg-gray-50 transition transform active:scale-95">
+                تفعيل بـ 1.0 π
+            </button>
+        </div>
+    </div>
+
+    <div class="px-4">
         <h3 class="font-bold text-gray-700 mb-3 flex justify-between items-center">
-            <span>تمارين اليوم</span>
-            <span class="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded">3 تمارين</span>
+            <span>تمارينك المقترحة</span>
+            <span id="exercise-count" class="text-xs text-purple-600 bg-purple-100 px-2 py-1 rounded">جاري الحساب...</span>
         </h3>
         
         <div id="exercises-list" class="space-y-3">
             <div class="text-center py-10 text-gray-400">
                 <i class="fas fa-circle-notch fa-spin text-2xl mb-2 text-purple-600"></i>
-                <p>جاري تحميل تمارينك...</p>
+                <p>جاري تحميل تمارين H-FIT...</p>
             </div>
         </div>
     </div>
 
     <div class="fixed bottom-0 w-full bg-white p-4 border-t shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
         <button class="w-full bg-hfit-purple text-white font-bold py-3.5 rounded-full shadow-lg hover:bg-purple-800 transition active:scale-95 flex justify-center items-center gap-2">
-            <i class="fas fa-play"></i> بدء التمرين
+            <i class="fas fa-play"></i> بدء الجلسة الآن
         </button>
     </div>
 
     <script src="js/supabase-config.js"></script>
-
     <script>
         async function fetchExercises() {
             const listContainer = document.getElementById('exercises-list');
+            const countLabel = document.getElementById('exercise-count');
             
-            // طلب البيانات من جدول exercises في Supabase
+            // جلب البيانات من Supabase
             const { data, error } = await _supabase
                 .from('exercises')
                 .select('*')
-                .order('created_at', { ascending: true }); // ترتيب حسب الأقدم
+                .order('created_at', { ascending: true });
 
-            // في حالة وجود خطأ
             if (error) {
-                console.error('Error fetching exercises:', error);
-                listContainer.innerHTML = `
-                    <div class="bg-red-50 text-red-600 p-4 rounded-xl text-center border border-red-100">
-                        <p>عذراً، حدث خطأ في الاتصال بقاعدة البيانات.</p>
-                    </div>`;
+                console.error('Supabase Error:', error);
+                listContainer.innerHTML = `<div class="p-4 bg-red-50 text-red-500 rounded-xl text-sm border border-red-100 text-center">فشل الاتصال بقاعدة بيانات التمارين</div>`;
                 return;
             }
 
-            // في حالة عدم وجود تمارين
             if (!data || data.length === 0) {
-                listContainer.innerHTML = `
-                    <div class="text-center py-10">
-                        <i class="fas fa-dumbbell text-4xl text-gray-300 mb-3"></i>
-                        <p class="text-gray-500">لا توجد تمارين مضافة حالياً.</p>
-                    </div>`;
+                listContainer.innerHTML = `<div class="text-center py-10 text-gray-400">لا توجد تمارين متاحة حالياً.</div>`;
+                countLabel.innerText = "0 تمارين";
                 return;
             }
 
-            // مسح علامة التحميل لبدء العرض
             listContainer.innerHTML = '';
+            countLabel.innerText = `${data.length} تمارين`;
             
-            // حلقة تكرارية لإنشاء كارت لكل تمرين
             data.forEach(exercise => {
-                // استخدام صورة افتراضية في حال عدم وجود صورة
-                const imageSrc = exercise.image_url ? exercise.image_url : 'https://via.placeholder.com/150/eee/999?text=H-FIT';
-
-                const cardHTML = `
-                <div class="bg-white p-3 rounded-2xl shadow-sm flex items-center gap-4 border border-gray-100 hover:shadow-md transition cursor-pointer">
-                    <div class="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden flex-shrink-0 relative">
+                // استخدام الصورة الافتراضية إذا لم يتم رفع صورة
+                const imageSrc = exercise.image_url ? exercise.image_url : 'https://via.placeholder.com/150/f3f4f6/999?text=H-FIT';
+                
+                listContainer.innerHTML += `
+                <div class="bg-white p-3 rounded-2xl shadow-sm flex items-center gap-4 border border-gray-100 hover:shadow-md transition">
+                    <div class="w-16 h-16 bg-gray-100 rounded-xl overflow-hidden relative border border-gray-50">
                         <img src="${imageSrc}" class="w-full h-full object-cover" alt="${exercise.name}">
-                        <div class="absolute inset-0 bg-black/5"></div>
                     </div>
-                    
                     <div class="flex-1">
-                        <h4 class="font-bold text-gray-800 text-lg leading-tight">${exercise.name}</h4>
+                        <h4 class="font-bold text-gray-800 text-base leading-tight">${exercise.name}</h4>
                         <div class="flex items-center gap-2 mt-1">
-                            <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded">${exercise.muscle_group}</span>
-                            <span class="text-xs text-gray-400">•</span>
-                            <span class="text-xs text-purple-600 font-medium">${exercise.difficulty || 'عام'}</span>
+                            <span class="text-[10px] uppercase font-bold text-gray-400 bg-gray-50 px-2 py-0.5 rounded">${exercise.muscle_group}</span>
+                            <span class="text-[10px] font-bold text-purple-600 bg-purple-50 px-2 py-0.5 rounded">${exercise.difficulty || 'Intermediate'}</span>
                         </div>
                     </div>
-
-                    <button class="w-8 h-8 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center hover:bg-purple-100 transition">
-                        <i class="fas fa-info text-sm"></i>
+                    <button class="w-8 h-8 rounded-full bg-gray-50 text-gray-400 flex items-center justify-center border border-gray-100">
+                        <i class="fas fa-chevron-left text-xs"></i>
                     </button>
                 </div>
                 `;
-                
-                // إضافة الكارت للقائمة
-                listContainer.innerHTML += cardHTML;
             });
         }
-
-        // تشغيل الدالة فور تحميل الصفحة
         fetchExercises();
     </script>
 </body>
