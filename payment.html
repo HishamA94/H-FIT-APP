@@ -6,7 +6,137 @@
     <title>مدفوعات Pi Network</title>
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+<script src="js/supabase-config.js"></script>
 
+<script>
+    const Pi = window.Pi;
+    // تأكد أن لديك عنصر في الصفحة يحمل id="status-msg" لعرض الرسائل
+    const statusMsg = document.getElementById('status-msg') || document.createElement('div'); 
+    // تأكد أن زر الدفع يحمل id="pay-button"
+    const payButton = document.getElementById('pay-button');
+    
+    let currentUser = ""; 
+
+    // تهيئة Pi SDK (اجعلها false عند الرفع للمايننت النهائي)
+    Pi.init({ version: "2.0", sandbox: true }); 
+
+    // --- دالة المصادقة وتسجيل الدخول ---
+    async function authenticateUser() {
+        try {
+            const scopes = ['username', 'payments'];
+            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+            
+            currentUser = auth.user.username;
+            
+            // محاولة عرض اسم المستخدم في الصفحة إذا كان هناك مكان مخصص له
+            const usernameDisplay = document.getElementById('username');
+            if(usernameDisplay) usernameDisplay.innerText = currentUser;
+
+            // تسجيل الزائر في قاعدة البيانات
+            await registerUserVisit(currentUser);
+
+            if(payButton) payButton.disabled = false;
+            showStatus("مرحباً " + currentUser + "! جاهز للاشتراك", "success");
+
+        } catch (err) {
+            console.error(err);
+            showStatus("فشل الاتصال بـ Pi: " + err, "error");
+        }
+    }
+
+    // --- دالة لتسجيل الزيارة في Supabase ---
+    async function registerUserVisit(username) {
+        // إذا لم يكن Supabase متصلاً، نخرج من الدالة لتجنب توقف التطبيق
+        if (typeof _supabase === 'undefined') {
+            console.error("Supabase not connected!");
+            return;
+        }
+
+        const { data, error } = await _supabase
+            .from('users')
+            .select('*')
+            .eq('username', username)
+            .single();
+
+        if (data) {
+            // مستخدم قديم: نحدث عدد الزيارات
+            await _supabase
+                .from('users')
+                .update({ 
+                    visit_count: data.visit_count + 1,
+                    last_visit: new Date()
+                })
+                .eq('username', username);
+        } else {
+            // مستخدم جديد: نضيفه
+            await _supabase
+                .from('users')
+                .insert([{ username: username, visit_count: 1 }]);
+        }
+    }
+
+    // معالجة المدفوعات غير المكتملة
+    function onIncompletePaymentFound(payment) { 
+        console.log("Found incomplete payment");
+        // يمكن إضافة كود اكمال العملية هنا
+    }
+
+    // --- عند الضغط على زر الدفع ---
+    if(payButton) {
+        payButton.addEventListener('click', () => {
+            const paymentData = {
+                amount: 1.0,
+                memo: "H-FIT Premium Subscription",
+                metadata: { type: "subscription" } 
+            };
+
+            const callbacks = {
+                onReadyForServerApproval: (paymentId) => {
+                    // في الوضع البسيط نوافق من العميل (غير آمن 100% لكن يعمل للتطبيق الصغير)
+                    // الأفضل وجود سيرفر backend للموافقة
+                    console.log("Ready for approval", paymentId);
+                },
+                onReadyForServerCompletion: (paymentId, txid) => {
+                    showStatus("تم الدفع! جاري تسجيل العملية...", "success");
+                    
+                    // 1. تسجيل الدفع في Supabase
+                    if (typeof _supabase !== 'undefined') {
+                        _supabase.from('payments').insert([{
+                            username: currentUser,
+                            amount: 1.0,
+                            payment_id: paymentId,
+                            status: 'Success'
+                        }]).then(() => {
+                            console.log("Payment saved to DB");
+                        });
+                    }
+
+                    // 2. التوجيه لصفحة التمارين
+                    showStatus("تم بنجاح! جاري تحويلك للتطبيق...", "success");
+                    payButton.innerText = "تم ✅";
+                    setTimeout(() => {
+                        window.location.href = 'app.html'; // التوجيه هنا
+                    }, 2000);
+                },
+                onCancel: (paymentId) => { showStatus("تم إلغاء الدفع", "error"); },
+                onError: (error, payment) => { showStatus("حدث خطأ: " + error, "error"); }
+            };
+
+            Pi.createPayment(paymentData, callbacks);
+        });
+    }
+
+    function showStatus(msg, type) {
+        if(statusMsg) {
+            statusMsg.innerText = msg;
+            statusMsg.style.color = type === 'error' ? 'red' : 'green';
+        }
+        console.log(msg);
+    }
+
+    // بدء التشغيل
+    authenticateUser();
+</script>
     <style>
         :root {
             --pi-purple: #5e2a84;
