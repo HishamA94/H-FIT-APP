@@ -8,117 +8,21 @@
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
     <style>
-        :root {
-            --pi-purple: #5e2a84;
-            --pi-gold: #ffa500;
-            --bg-color: #f0f2f5;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            color: #333;
-        }
-
-        .payment-card {
-            background: white;
-            padding: 30px;
-            border-radius: 25px;
-            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 400px;
-            text-align: center;
-        }
-
-        .pi-logo {
-            width: 70px;
-            height: 70px;
-            background: var(--pi-purple);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0 auto 20px;
-        }
-
-        .pi-logo span {
-            color: white;
-            font-size: 40px;
-            font-weight: bold;
-        }
-
-        h2 {
-            margin: 10px 0;
-            color: var(--pi-purple);
-        }
-
-        .user-info {
-            font-size: 1.1rem;
-            margin-bottom: 20px;
-            color: #666;
-        }
-
-        #username {
-            font-weight: bold;
-            color: var(--pi-purple);
-        }
-
-        .price-box {
-            background: #fff9e6;
-            border: 2px solid var(--pi-gold);
-            padding: 15px;
-            border-radius: 15px;
-            margin-bottom: 25px;
-        }
-
-        .amount {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: #333;
-        }
-
-        .currency {
-            font-size: 1.2rem;
-            color: var(--pi-gold);
-            font-weight: bold;
-        }
-
-        .btn-pay {
-            background: var(--pi-purple);
-            color: white;
-            border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
-            border-radius: 50px;
-            cursor: pointer;
-            width: 100%;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(94, 42, 132, 0.3);
-        }
-
-        .btn-pay:hover:not(:disabled) {
-            background: #4a1f69;
-            transform: translateY(-2px);
-        }
-
-        .btn-pay:disabled {
-            background: #ccc;
-            box-shadow: none;
-            cursor: not-allowed;
-        }
-
-        .status {
-            margin-top: 15px;
-            font-size: 0.9rem;
-            min-height: 20px;
-            font-weight: bold;
-        }
-
+        :root { --pi-purple: #5e2a84; --pi-gold: #ffa500; --bg-color: #f0f2f5; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--bg-color); display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; color: #333; }
+        .payment-card { background: white; padding: 30px; border-radius: 25px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); width: 100%; max-width: 400px; text-align: center; }
+        .pi-logo { width: 70px; height: 70px; background: var(--pi-purple); border-radius: 50%; display: flex; justify-content: center; align-items: center; margin: 0 auto 20px; }
+        .pi-logo span { color: white; font-size: 40px; font-weight: bold; }
+        h2 { margin: 10px 0; color: var(--pi-purple); }
+        .user-info { font-size: 1.1rem; margin-bottom: 20px; color: #666; }
+        #username { font-weight: bold; color: var(--pi-purple); }
+        .price-box { background: #fff9e6; border: 2px solid var(--pi-gold); padding: 15px; border-radius: 15px; margin-bottom: 25px; }
+        .amount { font-size: 2.5rem; font-weight: bold; color: #333; }
+        .currency { font-size: 1.2rem; color: var(--pi-gold); font-weight: bold; }
+        .btn-pay { background: var(--pi-purple); color: white; border: none; padding: 15px 40px; font-size: 1.2rem; border-radius: 50px; cursor: pointer; width: 100%; transition: all 0.3s ease; box-shadow: 0 4px 15px rgba(94, 42, 132, 0.3); }
+        .btn-pay:hover:not(:disabled) { background: #4a1f69; transform: translateY(-2px); }
+        .btn-pay:disabled { background: #ccc; box-shadow: none; cursor: not-allowed; }
+        .status { margin-top: 15px; font-size: 0.9rem; min-height: 20px; font-weight: bold; }
         .success { color: green; }
         .error { color: red; }
     </style>
@@ -127,7 +31,6 @@
 
     <div class="payment-card">
         <div class="pi-logo"><span>π</span></div>
-        
         <h2>بوابة مدفوعات Pi</h2>
         
         <div class="user-info">
@@ -140,87 +43,61 @@
         </div>
 
         <button id="pay-button" class="btn-pay" disabled>تفعيل الدفع</button>
-        
         <div id="status-msg" class="status"></div>
     </div>
 
     <script src="js/supabase-config.js"></script>
 
     <script>
-        // تعريف المتغيرات في البداية لتجنب أخطاء ReferenceError
+        // 1. التعريفات الأساسية
         const Pi = window.Pi;
         const statusMsg = document.getElementById('status-msg');
         const payButton = document.getElementById('pay-button');
         let currentUser = "";
 
-        // تهيئة Pi SDK (وضع false للسماح للجميع بالدخول)
+        // تهيئة Pi Network
         Pi.init({ version: "2.0", sandbox: false });
 
-        // دالة المصادقة الرئيسية
+        // 2. دالة تسجيل الدخول
         async function authenticateUser() {
             try {
                 const scopes = ['username', 'payments'];
                 const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-                
                 currentUser = auth.user.username;
                 
-                // تحديث اسم المستخدم في الشاشة
-                const usernameDisplay = document.getElementById('username');
-                if(usernameDisplay) usernameDisplay.innerText = currentUser;
-
-                // تفعيل زر الدفع
+                document.getElementById('username').innerText = currentUser;
                 if(payButton) payButton.disabled = false;
 
-                // محاولة تسجيل الزائر في قاعدة البيانات (بشكل آمن)
-                if (typeof _supabase !== 'undefined') {
-                    await registerUserVisit(currentUser);
-                } else {
-                    console.log("قاعدة البيانات غير متصلة، لكن سيستمر الدفع.");
-                }
-
-                console.log("تم تسجيل الدخول: " + currentUser);
+                // تسجيل الزيارة (اختياري)
+                if (typeof _supabase !== 'undefined') registerUserVisit(currentUser);
 
             } catch (err) {
                 console.error(err);
-                if(statusMsg) {
-                    statusMsg.innerText = "فشل الاتصال: " + err;
-                    statusMsg.className = "status error";
-                }
+                statusMsg.innerText = "فشل الاتصال: " + err;
+                statusMsg.className = "status error";
             }
         }
 
-        // دالة تسجيل الزيارة (Supabase)
+        // 3. دالة تسجيل الزيارة في Supabase
         async function registerUserVisit(username) {
             try {
-                const { data, error } = await _supabase
-                    .from('users')
-                    .select('*')
-                    .eq('username', username)
-                    .single();
-
+                const { data } = await _supabase.from('users').select('*').eq('username', username).single();
                 if (data) {
-                    await _supabase.from('users').update({ 
-                        visit_count: data.visit_count + 1, 
-                        last_visit: new Date() 
-                    }).eq('username', username);
+                    await _supabase.from('users').update({ visit_count: data.visit_count + 1, last_visit: new Date() }).eq('username', username);
                 } else {
-                    await _supabase.from('users').insert([{ 
-                        username: username, 
-                        visit_count: 1 
-                    }]);
+                    await _supabase.from('users').insert([{ username: username, visit_count: 1 }]);
                 }
-            } catch (e) {
-                console.error("خطأ بسيط في تسجيل الزيارة:", e);
+            } catch(e) { console.log(e); }
+        }
+
+        function onIncompletePaymentFound(payment) { 
+            // يمكن إرسالها للسيرفر للإكمال إذا لزم الأمر
+            if (payment.transaction && !payment.paid) {
+                axios.post('/.netlify/functions/complete', { paymentId: payment.identifier, txid: payment.transaction.txid });
             }
         }
 
-        // معالجة المدفوعات العالقة
-        function onIncompletePaymentFound(payment) { 
-            console.log("تم العثور على عملية غير مكتملة");
-            // يمكن إضافة منطق لإكمالها هنا
-        }
-
-        // برمجة زر الدفع
+        // 4. برمجة زر الدفع (الجزء الأهم: الاتصال بالسيرفر للموافقة)
         if(payButton) {
             payButton.addEventListener('click', () => {
                 const paymentData = {
@@ -230,51 +107,65 @@
                 };
 
                 const callbacks = {
-                    onReadyForServerApproval: (paymentId) => { 
-                        console.log("جاهز للموافقة", paymentId); 
-                    },
-                    onReadyForServerCompletion: (paymentId, txid) => {
-                        if(statusMsg) {
-                            statusMsg.innerText = "تم الدفع بنجاح! جاري تحويلك...";
-                            statusMsg.className = "status success";
-                        }
+                    // الخطوة 1: طلب الموافقة من السيرفر (يحل مشكلة Expiry)
+                    onReadyForServerApproval: async (paymentId) => {
+                        console.log("Waiting for approval...", paymentId);
+                        statusMsg.innerText = "جاري تأكيد العملية...";
                         
-                        // تسجيل عملية الدفع في قاعدة البيانات
-                        if (typeof _supabase !== 'undefined') {
-                            _supabase.from('payments').insert([{
-                                username: currentUser,
-                                amount: 1.0,
-                                payment_id: paymentId,
-                                status: 'Success'
-                            }]).then(() => console.log("تم حفظ الدفع"));
+                        try {
+                            // إرسال الطلب إلى Netlify Function
+                            await fetch('/.netlify/functions/approve', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ paymentId: paymentId })
+                            });
+                        } catch (error) {
+                            console.error("Approval failed", error);
+                            statusMsg.innerText = "فشل التأكيد من السيرفر";
                         }
+                    },
 
-                        payButton.innerText = "تم ✅";
-                        
-                        // التوجيه لصفحة التطبيق بعد ثانيتين
-                        setTimeout(() => { 
-                            window.location.href = 'app.html'; 
-                        }, 2000);
-                    },
-                    onCancel: (paymentId) => { 
-                        if(statusMsg) {
-                            statusMsg.innerText = "تم إلغاء العملية";
-                            statusMsg.className = "status error";
+                    // الخطوة 2: إتمام العملية بعد الدفع
+                    onReadyForServerCompletion: async (paymentId, txid) => {
+                        console.log("Completing payment...", txid);
+                        statusMsg.innerText = "تم الدفع! جاري التوثيق...";
+                        statusMsg.className = "status success";
+
+                        try {
+                            // إبلاغ السيرفر بالاكتمال
+                            await fetch('/.netlify/functions/complete', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ paymentId, txid })
+                            });
+
+                            // حفظ في Supabase
+                            if (typeof _supabase !== 'undefined') {
+                                await _supabase.from('payments').insert([{
+                                    username: currentUser,
+                                    amount: 1.0,
+                                    payment_id: paymentId,
+                                    status: 'Success'
+                                }]);
+                            }
+
+                            // النجاح النهائي والتوجيه
+                            payButton.innerText = "تم ✅";
+                            statusMsg.innerText = "مبروك! جاري تحويلك للتطبيق...";
+                            setTimeout(() => { window.location.href = 'app.html'; }, 2000);
+
+                        } catch (error) {
+                            console.error("Completion failed", error);
                         }
                     },
-                    onError: (error, payment) => { 
-                        if(statusMsg) {
-                            statusMsg.innerText = "حدث خطأ: " + error;
-                            statusMsg.className = "status error";
-                        }
-                    }
+                    onCancel: () => { statusMsg.innerText = "تم الإلغاء"; statusMsg.className = "status error"; },
+                    onError: (error) => { statusMsg.innerText = "خطأ: " + error; statusMsg.className = "status error"; }
                 };
 
                 Pi.createPayment(paymentData, callbacks);
             });
         }
 
-        // تشغيل النظام
         authenticateUser();
     </script>
 </body>
