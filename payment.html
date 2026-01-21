@@ -49,16 +49,13 @@
     <script src="js/supabase-config.js"></script>
 
     <script>
-        // 1. التعريفات الأساسية
         const Pi = window.Pi;
         const statusMsg = document.getElementById('status-msg');
         const payButton = document.getElementById('pay-button');
         let currentUser = "";
 
-        // تهيئة Pi Network
         Pi.init({ version: "2.0", sandbox: false });
 
-        // 2. دالة تسجيل الدخول
         async function authenticateUser() {
             try {
                 const scopes = ['username', 'payments'];
@@ -68,17 +65,15 @@
                 document.getElementById('username').innerText = currentUser;
                 if(payButton) payButton.disabled = false;
 
-                // تسجيل الزيارة (اختياري)
+                // تسجيل الزيارة
                 if (typeof _supabase !== 'undefined') registerUserVisit(currentUser);
 
             } catch (err) {
                 console.error(err);
                 statusMsg.innerText = "فشل الاتصال: " + err;
-                statusMsg.className = "status error";
             }
         }
 
-        // 3. دالة تسجيل الزيارة في Supabase
         async function registerUserVisit(username) {
             try {
                 const { data } = await _supabase.from('users').select('*').eq('username', username).single();
@@ -91,13 +86,16 @@
         }
 
         function onIncompletePaymentFound(payment) { 
-            // يمكن إرسالها للسيرفر للإكمال إذا لزم الأمر
+            // محاولة إكمال المدفوعات العالقة
             if (payment.transaction && !payment.paid) {
-                axios.post('/.netlify/functions/complete', { paymentId: payment.identifier, txid: payment.transaction.txid });
+                 fetch('/.netlify/functions/complete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId: payment.identifier, txid: payment.transaction.txid })
+                });
             }
         }
 
-        // 4. برمجة زر الدفع (الجزء الأهم: الاتصال بالسيرفر للموافقة)
         if(payButton) {
             payButton.addEventListener('click', () => {
                 const paymentData = {
@@ -107,13 +105,11 @@
                 };
 
                 const callbacks = {
-                    // الخطوة 1: طلب الموافقة من السيرفر (يحل مشكلة Expiry)
                     onReadyForServerApproval: async (paymentId) => {
                         console.log("Waiting for approval...", paymentId);
                         statusMsg.innerText = "جاري تأكيد العملية...";
                         
                         try {
-                            // إرسال الطلب إلى Netlify Function
                             await fetch('/.netlify/functions/approve', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
@@ -121,42 +117,41 @@
                             });
                         } catch (error) {
                             console.error("Approval failed", error);
-                            statusMsg.innerText = "فشل التأكيد من السيرفر";
                         }
                     },
 
-                    // الخطوة 2: إتمام العملية بعد الدفع
                     onReadyForServerCompletion: async (paymentId, txid) => {
                         console.log("Completing payment...", txid);
-                        statusMsg.innerText = "تم الدفع! جاري التوثيق...";
+                        statusMsg.innerText = "تم الدفع بنجاح! ✅";
                         statusMsg.className = "status success";
+                        payButton.innerText = "تم ✅";
 
+                        // 1. محاولة التسجيل في الخلفية (دون تعطيل المستخدم)
                         try {
-                            // إبلاغ السيرفر بالاكتمال
-                            await fetch('/.netlify/functions/complete', {
+                            // إرسال لـ Netlify Functions
+                            fetch('/.netlify/functions/complete', {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ paymentId, txid })
                             });
 
-                            // حفظ في Supabase
+                            // إرسال لـ Supabase
                             if (typeof _supabase !== 'undefined') {
-                                await _supabase.from('payments').insert([{
+                                _supabase.from('payments').insert([{
                                     username: currentUser,
                                     amount: 1.0,
                                     payment_id: paymentId,
                                     status: 'Success'
                                 }]);
                             }
-
-                            // النجاح النهائي والتوجيه
-                            payButton.innerText = "تم ✅";
-                            statusMsg.innerText = "مبروك! جاري تحويلك للتطبيق...";
-                            setTimeout(() => { window.location.href = 'app.html'; }, 2000);
-
-                        } catch (error) {
-                            console.error("Completion failed", error);
+                        } catch (e) {
+                            console.log("حدث خطأ في التسجيل الخلفي، لكن الدفع تم.");
                         }
+
+                        // 2. التحويل الإجباري للصفحة الرئيسية بعد ثانيتين
+                        setTimeout(() => { 
+                            window.location.href = 'app.html'; 
+                        }, 2000);
                     },
                     onCancel: () => { statusMsg.innerText = "تم الإلغاء"; statusMsg.className = "status error"; },
                     onError: (error) => { statusMsg.innerText = "خطأ: " + error; statusMsg.className = "status error"; }
