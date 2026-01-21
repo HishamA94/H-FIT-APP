@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مدفوعات Pi Network</title>
+    <title>H-FIT | اشتراك بريميوم</title>
     
     <script src="https://sdk.minepi.com/pi-sdk.js"></script>
 
@@ -116,6 +116,7 @@
             margin-top: 15px;
             font-size: 0.9rem;
             min-height: 20px;
+            font-weight: bold;
         }
 
         .success { color: green; }
@@ -130,7 +131,7 @@
         <h2>بوابة مدفوعات Pi</h2>
         
         <div class="user-info">
-            مرحباً، <span id="username">جاري التعرف عليك...</span>
+            مرحباً، <span id="username">جاري الاتصال...</span>
         </div>
 
         <div class="price-box">
@@ -145,99 +146,136 @@
 
     <script src="js/supabase-config.js"></script>
 
-<script>
-    // تعريف المتغيرات مرة واحدة فقط
-    const Pi = window.Pi;
-    const statusMsg = document.getElementById('status-msg') || document.createElement('div'); 
-    const payButton = document.getElementById('pay-button');
-    let currentUser = ""; 
+    <script>
+        // تعريف المتغيرات في البداية لتجنب أخطاء ReferenceError
+        const Pi = window.Pi;
+        const statusMsg = document.getElementById('status-msg');
+        const payButton = document.getElementById('pay-button');
+        let currentUser = "";
 
-    // تهيئة Pi
-    Pi.init({ version: "2.0", sandbox: false }); 
+        // تهيئة Pi SDK (وضع false للسماح للجميع بالدخول)
+        Pi.init({ version: "2.0", sandbox: false });
 
-    // دالة الدخول
-    async function authenticateUser() {
-        try {
-            const scopes = ['username', 'payments'];
-            const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
-            
-            currentUser = auth.user.username;
-            
-            // عرض الاسم (اختياري)
-            const usernameDisplay = document.getElementById('username');
-            if(usernameDisplay) usernameDisplay.innerText = currentUser;
+        // دالة المصادقة الرئيسية
+        async function authenticateUser() {
+            try {
+                const scopes = ['username', 'payments'];
+                const auth = await Pi.authenticate(scopes, onIncompletePaymentFound);
+                
+                currentUser = auth.user.username;
+                
+                // تحديث اسم المستخدم في الشاشة
+                const usernameDisplay = document.getElementById('username');
+                if(usernameDisplay) usernameDisplay.innerText = currentUser;
 
-            // تسجيل الزيارة في قاعدة البيانات
-            await registerUserVisit(currentUser);
+                // تفعيل زر الدفع
+                if(payButton) payButton.disabled = false;
 
-            if(payButton) payButton.disabled = false;
-            console.log("تم تسجيل الدخول: " + currentUser);
+                // محاولة تسجيل الزائر في قاعدة البيانات (بشكل آمن)
+                if (typeof _supabase !== 'undefined') {
+                    await registerUserVisit(currentUser);
+                } else {
+                    console.log("قاعدة البيانات غير متصلة، لكن سيستمر الدفع.");
+                }
 
-        } catch (err) {
-            console.error(err);
-            if(statusMsg) statusMsg.innerText = "فشل الاتصال: " + err;
+                console.log("تم تسجيل الدخول: " + currentUser);
+
+            } catch (err) {
+                console.error(err);
+                if(statusMsg) {
+                    statusMsg.innerText = "فشل الاتصال: " + err;
+                    statusMsg.className = "status error";
+                }
+            }
         }
-    }
 
-    // دالة تسجيل الزيارة في Supabase
-    async function registerUserVisit(username) {
-        if (typeof _supabase === 'undefined') return;
+        // دالة تسجيل الزيارة (Supabase)
+        async function registerUserVisit(username) {
+            try {
+                const { data, error } = await _supabase
+                    .from('users')
+                    .select('*')
+                    .eq('username', username)
+                    .single();
 
-        const { data, error } = await _supabase
-            .from('users')
-            .select('*')
-            .eq('username', username)
-            .single();
-
-        if (data) {
-            await _supabase.from('users').update({ visit_count: data.visit_count + 1, last_visit: new Date() }).eq('username', username);
-        } else {
-            await _supabase.from('users').insert([{ username: username, visit_count: 1 }]);
+                if (data) {
+                    await _supabase.from('users').update({ 
+                        visit_count: data.visit_count + 1, 
+                        last_visit: new Date() 
+                    }).eq('username', username);
+                } else {
+                    await _supabase.from('users').insert([{ 
+                        username: username, 
+                        visit_count: 1 
+                    }]);
+                }
+            } catch (e) {
+                console.error("خطأ بسيط في تسجيل الزيارة:", e);
+            }
         }
-    }
 
-    function onIncompletePaymentFound(payment) { console.log("Incomplete payment found"); }
+        // معالجة المدفوعات العالقة
+        function onIncompletePaymentFound(payment) { 
+            console.log("تم العثور على عملية غير مكتملة");
+            // يمكن إضافة منطق لإكمالها هنا
+        }
 
-    // زر الدفع
-    if(payButton) {
-        payButton.addEventListener('click', () => {
-            const paymentData = {
-                amount: 1.0,
-                memo: "H-FIT Premium Subscription",
-                metadata: { type: "subscription" } 
-            };
+        // برمجة زر الدفع
+        if(payButton) {
+            payButton.addEventListener('click', () => {
+                const paymentData = {
+                    amount: 1.0,
+                    memo: "H-FIT Premium Subscription",
+                    metadata: { type: "subscription" } 
+                };
 
-            const callbacks = {
-                onReadyForServerApproval: (paymentId) => { console.log("Approval ready", paymentId); },
-                onReadyForServerCompletion: (paymentId, txid) => {
-                    if(statusMsg) {
-                        statusMsg.innerText = "تم الدفع بنجاح! جاري التوجيه...";
-                        statusMsg.style.color = "green";
+                const callbacks = {
+                    onReadyForServerApproval: (paymentId) => { 
+                        console.log("جاهز للموافقة", paymentId); 
+                    },
+                    onReadyForServerCompletion: (paymentId, txid) => {
+                        if(statusMsg) {
+                            statusMsg.innerText = "تم الدفع بنجاح! جاري تحويلك...";
+                            statusMsg.className = "status success";
+                        }
+                        
+                        // تسجيل عملية الدفع في قاعدة البيانات
+                        if (typeof _supabase !== 'undefined') {
+                            _supabase.from('payments').insert([{
+                                username: currentUser,
+                                amount: 1.0,
+                                payment_id: paymentId,
+                                status: 'Success'
+                            }]).then(() => console.log("تم حفظ الدفع"));
+                        }
+
+                        payButton.innerText = "تم ✅";
+                        
+                        // التوجيه لصفحة التطبيق بعد ثانيتين
+                        setTimeout(() => { 
+                            window.location.href = 'app.html'; 
+                        }, 2000);
+                    },
+                    onCancel: (paymentId) => { 
+                        if(statusMsg) {
+                            statusMsg.innerText = "تم إلغاء العملية";
+                            statusMsg.className = "status error";
+                        }
+                    },
+                    onError: (error, payment) => { 
+                        if(statusMsg) {
+                            statusMsg.innerText = "حدث خطأ: " + error;
+                            statusMsg.className = "status error";
+                        }
                     }
-                    
-                    // تسجيل الدفع وتوجيه المستخدم
-                    if (typeof _supabase !== 'undefined') {
-                        _supabase.from('payments').insert([{
-                            username: currentUser,
-                            amount: 1.0,
-                            payment_id: paymentId,
-                            status: 'Success'
-                        }]);
-                    }
+                };
 
-                    payButton.innerText = "تم ✅";
-                    setTimeout(() => { window.location.href = 'app.html'; }, 2000);
-                },
-                onCancel: (paymentId) => { if(statusMsg) statusMsg.innerText = "تم الإلغاء"; },
-                onError: (error, payment) => { if(statusMsg) statusMsg.innerText = "خطأ: " + error; }
-            };
+                Pi.createPayment(paymentData, callbacks);
+            });
+        }
 
-            Pi.createPayment(paymentData, callbacks);
-        });
-    }
-
-    // بدء التشغيل
-    authenticateUser();
-</script>
+        // تشغيل النظام
+        authenticateUser();
+    </script>
 </body>
 </html>
