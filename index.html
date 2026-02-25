@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" id="html-root">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>H-FIT | Start Your Journey</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Oswald:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script src="https://sdk.minepi.com/pi-sdk.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <style>
+        body { font-family: 'Cairo', sans-serif; background-color: #0f0f0f; color: white; overflow-x: hidden; }
+        body[dir="ltr"] { font-family: 'Oswald', sans-serif; letter-spacing: 0.5px; }
+
+        .fixed-bg {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100vh;
+            background-image: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(15,15,15,1)), url('https://images.unsplash.com/photo-1581009146145-b5ef050c2e1e?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover; background-position: center; z-index: -1;
+        }
+
+        .packages-bg {
+            background-image: linear-gradient(to bottom, rgba(15,15,15,0.85), rgba(15,15,15,0.95)), url('assets/صفحة العروض.jpeg');
+            background-size: cover; background-position: center; background-attachment: scroll;
+        }
+
+        .neon-btn { box-shadow: 0 0 15px #8b5cf6; transition: all 0.3s ease; }
+        .neon-btn:hover { box-shadow: 0 0 25px #8b5cf6; transform: translateY(-2px); }
+        
+        .modal { transition: opacity 0.3s ease-in-out, transform 0.3s ease-in-out; opacity: 0; pointer-events: none; transform: scale(0.95); }
+        .modal.active { opacity: 1; pointer-events: auto; transform: scale(1); }
+        .modal-content { max-height: 85vh; overflow-y: auto; scrollbar-width: thin; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #1a1a1a; }
+        ::-webkit-scrollbar-thumb { background: #8b5cf6; border-radius: 4px; }
+
+        .star-rating i { cursor: pointer; transition: color 0.2s; color: #555; }
+        .star-rating i.active { color: #FFD700; text-shadow: 0 0 5px rgba(255, 215, 0, 0.5); }
+    </style>
+</head>
+<body class="flex flex-col min-h-screen">
+
+    <div class="fixed-bg"></div>
+
+    <nav class="absolute w-full z-50 p-6 flex justify-between items-center">
+        <div class="flex items-center gap-2">
+            <img src="assets/logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3022/3022306.png'" class="h-12 w-12 rounded-full border-2 border-purple-600 shadow-[0_0_15px_#8b5cf6]">
+            <h1 class="text-2xl font-black italic tracking-tighter text-white">H-FIT <span class="text-purple-500">APP</span></h1>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="toggleLanguage()" class="bg-purple-600/20 border border-purple-600 text-white px-3 py-1 rounded text-xs font-bold backdrop-blur-md">
+                <i class="fa-solid fa-globe"></i> <span id="lang-btn-text">EN</span>
+            </button>
+           <a href="app.html" id="btn-login" class="whitespace-nowrap border border-purple-600 text-purple-400 px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-purple-600 hover:text-white transition bg-black/30 backdrop-blur-md flex items-center gap-1">
+    <i class="fa-solid fa-user-lock"></i> <span>Login</span>
+</a>
+        </div>
+    </nav>
+
+    <section class="h-screen flex flex-col justify-center items-center text-center px-4 relative">
+        <h1 class="text-5xl md:text-7xl font-black mb-6 leading-tight animate-fade-in-up">
+            <span id="hero-title-1">حقق حلمك</span><br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-pink-500" id="hero-title-2">مع H-FIT</span>
+        </h1>
+        <p id="hero-desc" class="text-gray-300 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed font-semibold">
+            أول منصة تدريب ذكية مدعومة بعملة Pi Network. خوارزميات مصممة خصيصاً لتناسب جسمك، أدواتك، وهدفك.
+        </p>
+        <div class="flex flex-col md:flex-row gap-4 w-full max-w-md mb-8">
+            <a href="#packages" class="bg-purple-600 text-white py-4 rounded-xl font-bold text-xl neon-btn w-full flex items-center justify-center gap-2">
+                <span id="hero-btn">اشترك الآن</span> <i class="fa-solid fa-arrow-left" id="hero-arrow"></i>
+            </a>
+        </div>
+        
+        <div class="flex flex-col items-center gap-2 bg-black/40 p-4 rounded-2xl border border-gray-700 backdrop-blur-sm">
+            <p class="text-sm font-bold text-gray-300" id="rating-text">قيم تجربتك للتطبيق</p>
+            <div class="star-rating flex gap-2 text-2xl" id="stars-container">
+                <i class="fa-regular fa-star" onclick="rate(1)"></i>
+                <i class="fa-regular fa-star" onclick="rate(2)"></i>
+                <i class="fa-regular fa-star" onclick="rate(3)"></i>
+                <i class="fa-regular fa-star" onclick="rate(4)"></i>
+                <i class="fa-regular fa-star" onclick="rate(5)"></i>
+            </div>
+            <p id="rating-result" class="text-yellow-500 text-xs font-bold hidden"></p>
+        </div>
+    </section>
+
+    <section id="packages" class="py-20 relative z-10 packages-bg">
+        <div class="max-w-6xl mx-auto px-6">
+            <h2 class="text-4xl font-black text-center mb-4 text-white"><span id="pkg-title-1">اختر باقتك</span> <span class="text-purple-500" id="pkg-title-2">المناسبة</span></h2>
+            <p id="pkg-sub" class="text-center text-gray-300 mb-12 font-semibold">خطط مرنة تناسب جميع المستويات والميزانيات</p>
+            
+            <div class="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                <div class="bg-black/60 backdrop-blur-md p-8 rounded-3xl border border-gray-700 hover:border-purple-500 transition duration-300 relative">
+                    <h3 id="plan1-title" class="text-2xl font-bold text-white mb-2">الباقة الأساسية</h3>
+                    <div class="text-4xl font-black text-purple-500 mb-6">1 Pi <span id="per-month-1" class="text-sm text-gray-400 font-normal">/ شهر</span></div>
+                    <ul class="space-y-4 text-gray-200 mb-8 text-sm font-bold">
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> <span id="feat1-1">جدول تمارين ذكي (AI)</span></li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> <span id="feat1-2">صور متحركة (GIFs) للتمارين</span></li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> <span id="feat1-3">نظام غذائي مخصص</span></li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-green-500"></i> <span id="feat1-4">تحليل InBody تقديري</span></li>
+                    </ul>
+                    <button onclick="selectPlan('standard')" id="btn-plan1" class="w-full border border-purple-500 text-purple-500 py-3 rounded-xl font-bold hover:bg-purple-600 hover:text-white transition">اشترك الآن</button>
+                </div>
+
+                <div class="bg-black/70 backdrop-blur-lg p-8 rounded-3xl border-2 border-yellow-500 relative transform md:-translate-y-4 shadow-[0_0_30px_rgba(255,215,0,0.2)]">
+                    <div id="badge-popular" class="absolute -top-4 right-1/2 translate-x-1/2 bg-yellow-500 text-black px-4 py-1 rounded-full text-xs font-black">الأكثر طلباً 🔥</div>
+                    <h3 class="text-2xl font-bold text-white mb-2 flex items-center gap-2">Premium <i class="fa-solid fa-crown text-yellow-500"></i></h3>
+                    <div class="text-4xl font-black text-yellow-500 mb-6">3 Pi <span id="per-month-2" class="text-sm text-gray-400 font-normal">/ شهر</span></div>
+                    <ul class="space-y-4 text-gray-100 mb-8 text-sm font-bold">
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-yellow-500"></i> <span id="feat2-1">كل مميزات الباقة الأساسية</span></li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-video text-yellow-500"></i> <span id="feat2-2"><strong>فيديوهات شرح 4K (YouTube)</strong></span></li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-yellow-500"></i> <span id="feat2-3">تواصل مباشر مع المدرب</span></li>
+                        <li class="flex items-center gap-2"><i class="fa-solid fa-check text-yellow-500"></i> <span id="feat2-4">أولوية في الدعم الفني</span></li>
+                    </ul>
+                    <button onclick="selectPlan('premium')" id="btn-plan2" class="w-full bg-gradient-to-r from-yellow-500 to-orange-500 text-black py-3 rounded-xl font-bold hover:shadow-[0_0_20px_#FFD700] transition transform hover:scale-105">اشترك وتميز 👑</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-[#151515] pt-16 pb-10 border-t border-gray-800 relative z-10">
+        <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-4 gap-10">
+            <div class="flex flex-col gap-4 text-start">
+                <div class="flex items-center gap-2">
+                    <img src="assets/logo.png" onerror="this.src='https://cdn-icons-png.flaticon.com/512/3022/3022306.png'" class="h-10 w-10 rounded-full">
+                    <h2 class="font-bold text-xl tracking-wide">H-FIT APP</h2>
+                </div>
+                <p id="footer-desc" class="text-gray-400 text-sm leading-relaxed">
+                    المتجر الأول لخدمات اللياقة البدنية المدفوعة بعملة Pi Network. صحتك هي استثمارك الحقيقي.
+                </p>
+                <div class="flex gap-4 mt-2 justify-start">
+                    <a href="https://wa.me/201113537245" target="_blank" class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-gray-400 hover:text-green-500 transition"><i class="fa-brands fa-whatsapp text-lg"></i></a>
+                    <a href="https://www.facebook.com/share/1FnrVEpvKd/" target="_blank" class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-gray-400 hover:text-blue-600 transition"><i class="fa-brands fa-facebook-f text-lg"></i></a>
+                    <a href="https://t.me/Cr7_Hisham" target="_blank" class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-gray-400 hover:text-blue-400 transition"><i class="fa-brands fa-telegram text-lg"></i></a>
+                    <a href="https://www.instagram.com/mr_hisham.ahmed_" target="_blank" class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-gray-400 hover:text-pink-500 transition"><i class="fa-brands fa-instagram text-lg"></i></a>
+                    <a href="https://www.youtube.com/@hishamahmed1327" target="_blank" class="w-10 h-10 rounded-full bg-[#262626] flex items-center justify-center text-gray-400 hover:text-red-600 transition"><i class="fa-brands fa-youtube text-lg"></i></a>
+                </div>
+            </div>
+            
+            <div class="flex flex-col gap-4 text-start">
+                <h3 id="ft-links" class="font-bold text-white text-lg">روابط سريعة</h3>
+                <ul class="space-y-3 text-sm text-gray-400 font-medium">
+                    <li><a href="#" id="link-home" class="hover:text-purple-500 transition block w-fit">الرئيسية</a></li>
+                    <li><a href="#packages" id="link-pkg" class="hover:text-purple-500 transition block w-fit">الباقات (اشترك الآن)</a></li>
+                    <li><button onclick="openModal('about-modal')" id="link-about" class="hover:text-purple-500 transition">عن التطبيق (About)</button></li>
+                </ul>
+            </div>
+
+            <div class="flex flex-col gap-4 text-start">
+                <h3 id="ft-support" class="font-bold text-white text-lg">الدعم والمساعدة</h3>
+                <ul class="space-y-3 text-sm text-gray-400 font-medium">
+                    <li><button onclick="openModal('faq-modal')" id="link-faq" class="hover:text-purple-500 transition">الأسئلة الشائعة</button></li>
+                    <li><button onclick="openModal('privacy-modal')" id="link-privacy" class="hover:text-purple-500 transition">سياسة الخصوصية</button></li>
+                    <li><button onclick="openModal('terms-modal')" id="link-terms" class="hover:text-purple-500 transition">شروط الاستخدام</button></li>
+                </ul>
+            </div>
+
+            <div class="flex flex-col gap-4 text-start">
+                <h3 id="ft-contact" class="font-bold text-white text-lg">تواصل معنا</h3>
+                <ul class="space-y-4 text-sm text-gray-400 font-medium">
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-envelope text-purple-500 bg-purple-500/10 p-2 rounded-lg"></i><span>Hesham.ahmed9999@gmail.com</span></li>
+                    <li class="flex items-center gap-3"><i class="fa-brands fa-whatsapp text-purple-500 bg-purple-500/10 p-2 rounded-lg"></i><span>01113537245</span></li>
+                    <li class="flex items-center gap-3"><i class="fa-solid fa-user-tie text-purple-500 bg-purple-500/10 p-2 rounded-lg"></i><div><span class="block text-xs text-gray-500">Owner</span><span>Hisham Ahmed</span></div></li>
+                </ul>
+            </div>
+        </div>
+        <div class="text-center mt-16 pt-8 border-t border-gray-800 text-gray-600 text-sm font-bold">
+            &copy; 2026 H-FIT App. All rights reserved. Powered by Pi Network.
+        </div>
+    </footer>
+
+    <div id="about-modal" class="modal fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
+        <div class="bg-[#1a1a1a] border border-purple-600 rounded-2xl w-full max-w-2xl p-8 relative shadow-2xl modal-content">
+            <button onclick="closeModal('about-modal')" class="absolute top-4 left-4 text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h2 class="text-3xl font-black text-purple-500 mb-6 border-b border-gray-800 pb-4 text-start"><span id="about-title">عن تطبيق H-FIT</span> <i class="fa-solid fa-dumbbell ml-2"></i></h2>
+            <div class="text-gray-300 space-y-6 leading-loose text-start font-medium">
+                <p id="about-desc-1" class="text-lg text-white font-bold italic">H-FIT هو تطبيق تدريب شخصي ذكي يوفر تمارين مخصصة بالكامل بناءً على أهدافك، مستوى لياقتك، والمعدات المتاحة لديك.</p>
+                <div>
+                    <h4 id="about-tech-title" class="text-purple-400 font-bold mb-2">🚀 تكنولوجيا الذكاء الاصطناعي الخاص بنا:</h4>
+                    <p id="about-tech-desc">يعتمد H-FIT على خوارزميات علمية مدعومة بالـ Machine Learning لتعلم أداءك الشخصي. التطبيق يحلل البيانات (التكرارات، المجموعات، التعب، والراحة) ليعدل تمرينك التالي ديناميكياً لضمان "الزيادة التدريجية" (Progressive Overload) والتعافي العضلي الأمثل.</p>
+                </div>
+                <div class="grid md:grid-cols-2 gap-4">
+                    <div class="bg-[#262626] p-4 rounded-xl border-r-4 border-purple-600">
+                        <h5 class="text-white font-bold mb-1"><i class="fa-solid fa-check text-green-500"></i> <span id="about-level-title">لكل المستويات</span></h5>
+                        <p id="about-level-desc" class="text-sm text-gray-400">من المبتدئين تماماً وحتى لاعبي الباورليفتنج المحترفين.</p>
+                    </div>
+                    <div class="bg-[#262626] p-4 rounded-xl border-r-4 border-purple-600">
+                        <h5 class="text-white font-bold mb-1"><i class="fa-solid fa-check text-green-500"></i> <span id="about-place-title">في أي مكان</span></h5>
+                        <p id="about-place-desc" class="text-sm text-gray-400">في الجيم، المنزل، أو حتى بدون أي معدات تماماً.</p>
+                    </div>
+                </div>
+                <p id="about-footer">صُمم H-FIT حصرياً لتمارين المقاومة والقوة، حيث يركز على بناء العضلات الصافية، تحسين الأيض (Metabolism)، وزيادة كثافة العظام والتحمل البدني الشامل.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="faq-modal" class="modal fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
+        <div class="bg-[#1a1a1a] border border-blue-600 rounded-2xl w-full max-w-3xl p-8 relative shadow-2xl modal-content">
+            <button onclick="closeModal('faq-modal')" class="absolute top-4 left-4 text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h2 class="text-3xl font-black text-blue-500 mb-6 border-b border-gray-800 pb-4 text-start"><span id="faq-title">الأسئلة الشائعة FAQ</span> <i class="fa-solid fa-circle-question ml-2"></i></h2>
+            <div class="space-y-4">
+                <details class="bg-[#262626] rounded-xl overflow-hidden group">
+                    <summary class="p-4 cursor-pointer font-bold flex justify-between items-center text-white text-start"><span id="faq-q1">كيف يقوم H-FIT بتخصيص تماريني؟</span> <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition"></i></summary>
+                    <div id="faq-a1" class="p-4 pt-0 text-gray-400 text-sm border-t border-gray-700/50 mt-2 text-start">يقوم التطبيق بتحليل مستوى لياقتك الحالي، تاريخ أدائك السابق، حالة التعافي، والمعدات التي تمتلكها ليقوم بإنشاء "خطة ذكية" تتغير مع كل جلسة تدريبية.</div>
+                </details>
+                <details class="bg-[#262626] rounded-xl overflow-hidden group">
+                    <summary class="p-4 cursor-pointer font-bold flex justify-between items-center text-white text-start"><span id="faq-q2">هل أحتاج للذهاب إلى الجيم لاستخدام التطبيق؟</span> <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition"></i></summary>
+                    <div id="faq-a2" class="p-4 pt-0 text-gray-400 text-sm border-t border-gray-700/50 mt-2 text-start">إطلاقاً! يمكنك تخصيص إعدادات المعدات لتشمل (وزن الجسم، أحبال المقاومة، أو أدوات بسيطة) وسيقوم H-FIT بإنشاء جدول فعال يناسب بيئتك الحالية.</div>
+                </details>
+                <details class="bg-[#262626] rounded-xl overflow-hidden group">
+                    <summary class="p-4 cursor-pointer font-bold flex justify-between items-center text-white text-start"><span id="faq-q3">ما هي مدة التمرين في H-FIT؟</span> <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition"></i></summary>
+                    <div id="faq-a3" class="p-4 pt-0 text-gray-400 text-sm border-t border-gray-700/50 mt-2 text-start">أنت المتحكم! يمكنك تحديد وقت الجلسة (30، 45، أو 60 دقيقة) وسيقوم التطبيق بتوليد تمارين تناسب هذا الإطار الزمني بدقة.</div>
+                </details>
+                <details class="bg-[#262626] rounded-xl overflow-hidden group">
+                    <summary class="p-4 cursor-pointer font-bold flex justify-between items-center text-white text-start"><span id="faq-q4">هل يدعم التطبيق العمل بدون إنترنت؟</span> <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition"></i></summary>
+                    <div id="faq-a4" class="p-4 pt-0 text-gray-400 text-sm border-t border-gray-700/50 mt-2 text-start">نعم، بمجرد إنشاء جدول تمرين اليوم، يمكنك الدخول إليه وإكماله في مناطق الجيم التي لا تتوفر فيها تغطية إنترنت قوية.</div>
+                </details>
+                <details class="bg-[#262626] rounded-xl overflow-hidden group">
+                    <summary class="p-4 cursor-pointer font-bold flex justify-between items-center text-white text-start"><span id="faq-q5">هل يتوفر شرح بالفيديو للتمارين؟</span> <i class="fa-solid fa-chevron-down text-gray-500 group-open:rotate-180 transition"></i></summary>
+                    <div id="faq-a5" class="p-4 pt-0 text-gray-400 text-sm border-t border-gray-700/50 mt-2 text-start">بكل تأكيد، كل تمرين في التطبيق يتضمن فيديو تعليمي احترافي مع تعليمات خطوة بخطوة لضمان التكنيك الصحيح وتجنب الإصابات.</div>
+                </details>
+            </div>
+        </div>
+    </div>
+
+    <div id="privacy-modal" class="modal fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
+        <div class="bg-[#1a1a1a] border border-green-600 rounded-2xl w-full max-w-2xl p-8 relative shadow-2xl modal-content">
+            <button onclick="closeModal('privacy-modal')" class="absolute top-4 left-4 text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h2 class="text-3xl font-black text-green-500 mb-6 border-b border-gray-800 pb-4 text-start"><span id="privacy-title">سياسة الخصوصية</span> <i class="fa-solid fa-shield-halved ml-2"></i></h2>
+            <div class="text-gray-300 space-y-4 text-sm leading-relaxed text-start">
+                <p id="privacy-intro" class="font-bold text-white">في H-FIT، خصوصية بياناتك هي أولويتنا القصوى.</p>
+                <ul class="list-disc list-inside space-y-2 text-gray-400">
+                    <li id="priv-1">يتم استخدام بياناتك البدنية (الوزن، الطول، العمر) فقط لتحسين دقة خوارزمية الذكاء الاصطناعي وتخصيص تمارينك.</li>
+                    <li id="priv-2">كل بيانات الأداء والتقدم مخزنة بشكل آمن لتعزيز تجربة التعلم الآلي الخاصة بتطبيقك فقط.</li>
+                    <li id="priv-3">لا نقوم بمشاركة أي من بياناتك الشخصية مع أطراف ثالثة لأغراض إعلانية.</li>
+                    <li id="priv-4">عمليات الدفع تتم عبر شبكة Pi Network المشفرة، ولا نطلع على مفاتيح محفظتك الخاصة أبداً.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div id="terms-modal" class="modal fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-4 backdrop-blur-sm">
+        <div class="bg-[#1a1a1a] border border-orange-600 rounded-2xl w-full max-w-2xl p-8 relative shadow-2xl modal-content text-start">
+            <button onclick="closeModal('terms-modal')" class="absolute top-4 left-4 text-gray-400 hover:text-white transition"><i class="fa-solid fa-xmark text-2xl"></i></button>
+            <h2 class="text-3xl font-black text-orange-500 mb-6 border-b border-gray-800 pb-4 text-start"><span id="terms-title">شروط الاستخدام</span> <i class="fa-solid fa-file-contract ml-2"></i></h2>
+            <div class="text-gray-300 space-y-4 text-sm leading-relaxed">
+                <ul class="space-y-4">
+                    <li class="bg-[#262626] p-3 rounded-lg border-r-4 border-orange-500" id="term-1">يُحظر استخدام التطبيق خارج بيئة متصفح <strong>Pi Browser</strong> الرسمية.</li>
+                    <li class="bg-[#262626] p-3 rounded-lg border-r-4 border-orange-500" id="term-2">التطبيق مخصص للأفراد البالغين (+18 سنة) ولا يُنصح باستخدامه لمن يعانون من مشاكل صحية مزمنة دون استشارة طبية.</li>
+                    <li class="bg-[#262626] p-3 rounded-lg border-r-4 border-orange-500" id="term-3">H-FIT هو أداة تدريبية، والنتائج تختلف من فرد لآخر بناءً على الالتزام بالتغذية والتمارين.</li>
+                    <li class="bg-[#262626] p-3 rounded-lg border-r-4 border-orange-500" id="term-4">حقوق الملكية الفكرية للخوارزميات وتصميمات التمارين محفوظة بالكامل لصالح <strong>H-FIT App</strong>.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ✅ مفاتيح الاتصال الخاصة بك
+        const SUPABASE_URL = "https://valmvuperfpsftqoptbp.supabase.co";
+        const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZhbG12dXBlcmZwc2Z0cW9wdGJwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg4ODU1MDAsImV4cCI6MjA4NDQ2MTUwMH0.0EcQBFQa52Sfuh77V-iW1Q7gGBtNFpGS_2P_DthDMLU";
+
+        let _supabase;
+        if (typeof supabase !== 'undefined') {
+            _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("H-FIT: Connected to Supabase ✅");
+        } else {
+            console.error("Supabase Library Not Found!");
+        }
+
+        // إعدادات اللغة
+        let currentLang = localStorage.getItem('hfit_lang') || 'ar';
+        const tDB = {
+            ar: {
+                langBtn: "English", btnLogin: "دخول المشتركين",
+                heroTitle1: "حقق حلمك", heroTitle2: "مع H-FIT",
+                heroDesc: "أول منصة تدريب ذكية مدعومة بعملة Pi Network. خوارزميات مصممة خصيصاً لتناسب جسمك، أدواتك، وهدفك.",
+                heroBtn: "اشترك الآن", ratingText: "قيم تجربتك للتطبيق", ratingDone: "تم تسجيل تقييمك بنجاح ✅",
+                pkgTitle1: "اختر باقتك", pkgTitle2: "المناسبة", pkgSub: "خطط مرنة تناسب جميع المستويات والميزانيات",
+                plan1Title: "الباقة الأساسية", perMonth: "/ شهر",
+                feat1_1: "جدول تمارين ذكي (AI)", feat1_2: "صور متحركة (GIFs)", feat1_3: "نظام غذائي مخصص", feat1_4: "تحليل InBody تقديري",
+                btnPlan1: "اشترك الآن", badgePop: "الأكثر طلباً 🔥",
+                feat2_1: "كل مميزات الباقة الأساسية", feat2_2: "فيديوهات شرح 4K", feat2_3: "تواصل مباشر مع المدرب", feat2_4: "أولوية في الدعم الفني",
+                btnPlan2: "اشترك وتميز 👑",
+                footerDesc: "المتجر الأول لخدمات اللياقة البدنية المدفوعة بعملة Pi Network. صحتك هي استثمارك الحقيقي.",
+                ftLinks: "روابط سريعة", linkHome: "الرئيسية", linkPkg: "الباقات", linkAbout: "عن التطبيق",
+                ftSupport: "الدعم والمساعدة", linkFaq: "الأسئلة الشائعة", linkPrivacy: "سياسة الخصوصية", linkTerms: "شروط الاستخدام",
+                ftContact: "تواصل معنا",
+                
+                // --- ترجمة النوافذ المنبثقة (Modals) ---
+                aboutTitle: "عن تطبيق H-FIT",
+                aboutDesc1: "H-FIT هو تطبيق تدريب شخصي ذكي يوفر تمارين مخصصة بالكامل بناءً على أهدافك، مستوى لياقتك، والمعدات المتاحة لديك.",
+                aboutTechTitle: "🚀 تكنولوجيا الذكاء الاصطناعي الخاص بنا:",
+                aboutTechDesc: "يعتمد H-FIT على خوارزميات علمية مدعومة بالـ Machine Learning لتعلم أداءك الشخصي. التطبيق يحلل البيانات (التكرارات، المجموعات، التعب، والراحة) ليعدل تمرينك التالي ديناميكياً لضمان \"الزيادة التدريجية\" (Progressive Overload) والتعافي العضلي الأمثل.",
+                aboutLevelTitle: "لكل المستويات", aboutLevelDesc: "من المبتدئين تماماً وحتى لاعبي الباورليفتنج المحترفين.",
+                aboutPlaceTitle: "في أي مكان", aboutPlaceDesc: "في الجيم، المنزل، أو حتى بدون أي معدات تماماً.",
+                aboutFooter: "صُمم H-FIT حصرياً لتمارين المقاومة والقوة، حيث يركز على بناء العضلات الصافية، تحسين الأيض (Metabolism)، وزيادة كثافة العظام والتحمل البدني الشامل.",
+                
+                faqTitle: "الأسئلة الشائعة FAQ",
+                faqQ1: "كيف يقوم H-FIT بتخصيص تماريني؟", faqA1: "يقوم التطبيق بتحليل مستوى لياقتك الحالي، تاريخ أدائك السابق، حالة التعافي، والمعدات التي تمتلكها ليقوم بإنشاء \"خطة ذكية\" تتغير مع كل جلسة تدريبية.",
+                faqQ2: "هل أحتاج للذهاب إلى الجيم لاستخدام التطبيق؟", faqA2: "إطلاقاً! يمكنك تخصيص إعدادات المعدات لتشمل (وزن الجسم، أحبال المقاومة، أو أدوات بسيطة) وسيقوم H-FIT بإنشاء جدول فعال يناسب بيئتك الحالية.",
+                faqQ3: "ما هي مدة التمرين في H-FIT؟", faqA3: "أنت المتحكم! يمكنك تحديد وقت الجلسة (30، 45، أو 60 دقيقة) وسيقوم التطبيق بتوليد تمارين تناسب هذا الإطار الزمني بدقة.",
+                faqQ4: "هل يدعم التطبيق العمل بدون إنترنت؟", faqA4: "نعم، بمجرد إنشاء جدول تمرين اليوم، يمكنك الدخول إليه وإكماله في مناطق الجيم التي لا تتوفر فيها تغطية إنترنت قوية.",
+                faqQ5: "هل يتوفر شرح بالفيديو للتمارين؟", faqA5: "بكل تأكيد، كل تمرين في التطبيق يتضمن فيديو تعليمي احترافي مع تعليمات خطوة بخطوة لضمان التكنيك الصحيح وتجنب الإصابات.",
+                
+                privacyTitle: "سياسة الخصوصية",
+                privacyIntro: "في H-FIT، خصوصية بياناتك هي أولويتنا القصوى.",
+                priv1: "يتم استخدام بياناتك البدنية (الوزن، الطول، العمر) فقط لتحسين دقة خوارزمية الذكاء الاصطناعي وتخصيص تمارينك.",
+                priv2: "كل بيانات الأداء والتقدم مخزنة بشكل آمن لتعزيز تجربة التعلم الآلي الخاصة بتطبيقك فقط.",
+                priv3: "لا نقوم بمشاركة أي من بياناتك الشخصية مع أطراف ثالثة لأغراض إعلانية.",
+                priv4: "عمليات الدفع تتم عبر شبكة Pi Network المشفرة، ولا نطلع على مفاتيح محفظتك الخاصة أبداً.",
+                
+                termsTitle: "شروط الاستخدام",
+                term1: "يُحظر استخدام التطبيق خارج بيئة متصفح Pi Browser الرسمية.",
+                term2: "التطبيق مخصص للأفراد البالغين (+18 سنة) ولا يُنصح باستخدامه لمن يعانون من مشاكل صحية مزمنة دون استشارة طبية.",
+                term3: "H-FIT هو أداة تدريبية، والنتائج تختلف من فرد لآخر بناءً على الالتزام بالتغذية والتمارين.",
+                term4: "حقوق الملكية الفكرية للخوارزميات وتصميمات التمارين محفوظة بالكامل لصالح H-FIT App."
+            },
+            en: {
+                langBtn: "عربي", btnLogin: "Subscriber Login",
+                heroTitle1: "Achieve Your Dream", heroTitle2: "With H-FIT",
+                heroDesc: "The first smart fitness platform powered by Pi Network. Custom algorithms tailored to your body, tools, and goals.",
+                heroBtn: "Subscribe Now", ratingText: "Rate Your Experience", ratingDone: "Rating Saved Successfully ✅",
+                pkgTitle1: "Choose Your", pkgTitle2: "Plan", pkgSub: "Flexible plans for all levels and budgets",
+                plan1Title: "Standard Plan", perMonth: "/ Month",
+                feat1_1: "Smart AI Workout Plan", feat1_2: "Exercise GIFs", feat1_3: "Custom Diet Plan", feat1_4: "InBody Analysis",
+                btnPlan1: "Subscribe Now", badgePop: "Most Popular 🔥",
+                feat2_1: "All Standard Features", feat2_2: "4K Explanation Videos", feat2_3: "Direct Coach Chat", feat2_4: "Priority Support",
+                btnPlan2: "Subscribe Premium 👑",
+                footerDesc: "The #1 Fitness Store powered by Pi Network. Your health is your real investment.",
+                ftLinks: "Quick Links", linkHome: "Home", linkPkg: "Packages", linkAbout: "About App",
+                ftSupport: "Support", linkFaq: "FAQ", linkPrivacy: "Privacy Policy", linkTerms: "Terms of Use",
+                ftContact: "Contact Us",
+
+                // --- Modals Translation ---
+                aboutTitle: "About H-FIT",
+                aboutDesc1: "H-FIT is a smart personal training app that provides fully customized workouts based on your goals, fitness level, and available equipment.",
+                aboutTechTitle: "🚀 Our AI Technology:",
+                aboutTechDesc: "H-FIT relies on scientific algorithms powered by Machine Learning to learn your personal performance. The app analyzes data (reps, sets, fatigue, rest) to dynamically adjust your next workout ensuring optimal \"Progressive Overload\" and muscle recovery.",
+                aboutLevelTitle: "All Levels", aboutLevelDesc: "From complete beginners to pro powerlifters.",
+                aboutPlaceTitle: "Anywhere", aboutPlaceDesc: "Gym, Home, or even with no equipment at all.",
+                aboutFooter: "H-FIT is designed exclusively for resistance and strength training, focusing on building lean muscle, improving metabolism, and increasing bone density and overall endurance.",
+                
+                faqTitle: "FAQ",
+                faqQ1: "How does H-FIT customize my workouts?", faqA1: "The app analyzes your current fitness level, performance history, recovery status, and available equipment to create a \"smart plan\" that evolves with every session.",
+                faqQ2: "Do I need a gym to use the app?", faqA2: "Not at all! You can customize equipment settings to include (Bodyweight, Resistance Bands, or basic tools) and H-FIT will generate an effective plan for your environment.",
+                faqQ3: "How long is the workout?", faqA3: "You are in control! You can select session duration (30, 45, or 60 mins) and the app will generate workouts fitting that timeframe perfectly.",
+                faqQ4: "Does it support offline mode?", faqA4: "Yes, once today's workout is generated, you can access and complete it in gym areas with poor internet coverage.",
+                faqQ5: "Are there video tutorials?", faqA5: "Absolutely, every exercise includes professional video tutorials with step-by-step instructions to ensure proper form and prevent injury.",
+                
+                privacyTitle: "Privacy Policy",
+                privacyIntro: "At H-FIT, your data privacy is our top priority.",
+                priv1: "Physical data (weight, height, age) is used solely to improve AI algorithm accuracy and customize your workouts.",
+                priv2: "All performance and progress data is stored securely to enhance your specific machine learning experience only.",
+                priv3: "We do not share any personal data with third parties for advertising purposes.",
+                priv4: "Payments are processed via the encrypted Pi Network, and we never have access to your private wallet keys.",
+                
+                termsTitle: "Terms of Use",
+                term1: "Using the app outside the official Pi Browser environment is prohibited.",
+                term2: "The app is for adults (18+) and is not recommended for those with chronic health issues without medical consultation.",
+                term3: "H-FIT is a training tool; results vary from person to person based on adherence to nutrition and exercise.",
+                term4: "Intellectual property rights for algorithms and workout designs are fully reserved by H-FIT App."
+            }
+        };
+
+        function applyTranslations() {
+            const t = tDB[currentLang];
+            document.getElementById('html-root').setAttribute('dir', currentLang === 'ar' ? 'rtl' : 'ltr');
+            document.body.style.fontFamily = currentLang === 'ar' ? "'Cairo', sans-serif" : "'Oswald', sans-serif";
+            document.getElementById('hero-arrow').className = currentLang === 'ar' ? "fa-solid fa-arrow-left" : "fa-solid fa-arrow-right";
+
+            const map = {
+                'lang-btn-text': t.langBtn, 'btn-login': t.btnLogin,
+                'hero-title-1': t.heroTitle1, 'hero-title-2': t.heroTitle2, 'hero-desc': t.heroDesc, 'hero-btn': t.heroBtn,
+                'rating-text': t.ratingText, 'pkg-title-1': t.pkgTitle1, 'pkg-title-2': t.pkgTitle2, 'pkg-sub': t.pkgSub,
+                'plan1-title': t.plan1Title, 'per-month-1': t.perMonth, 'per-month-2': t.perMonth,
+                'feat1-1': t.feat1_1, 'feat1-2': t.feat1_2, 'feat1-3': t.feat1_3, 'feat1-4': t.feat1_4,
+                'btn-plan1': t.btnPlan1, 'badge-popular': t.badgePop,
+                'feat2-1': t.feat2_1, 'feat2-2': t.feat2_2, 'feat2-3': t.feat2_3, 'feat2-4': t.feat2_4, 'btn-plan2': t.btnPlan2,
+                'footer-desc': t.footerDesc, 'ft-links': t.ftLinks, 'link-home': t.linkHome, 'link-pkg': t.linkPkg, 'link-about': t.linkAbout,
+                'ft-support': t.ftSupport, 'link-faq': t.linkFaq, 'link-privacy': t.linkPrivacy, 'link-terms': t.linkTerms, 'ft-contact': t.ftContact,
+                
+                // Modals Mappings
+                'about-title': t.aboutTitle, 'about-desc-1': t.aboutDesc1, 'about-tech-title': t.aboutTechTitle, 'about-tech-desc': t.aboutTechDesc,
+                'about-level-title': t.aboutLevelTitle, 'about-level-desc': t.aboutLevelDesc, 'about-place-title': t.aboutPlaceTitle, 'about-place-desc': t.aboutPlaceDesc, 'about-footer': t.aboutFooter,
+                'faq-title': t.faqTitle, 'faq-q1': t.faqQ1, 'faq-a1': t.faqA1, 'faq-q2': t.faqQ2, 'faq-a2': t.faqA2, 'faq-q3': t.faqQ3, 'faq-a3': t.faqA3, 'faq-q4': t.faqQ4, 'faq-a4': t.faqA4, 'faq-q5': t.faqQ5, 'faq-a5': t.faqA5,
+                'privacy-title': t.privacyTitle, 'privacy-intro': t.privacyIntro, 'priv-1': t.priv1, 'priv-2': t.priv2, 'priv-3': t.priv3, 'priv-4': t.priv4,
+                'terms-title': t.termsTitle, 'term-1': t.term1, 'term-2': t.term2, 'term-3': t.term3, 'term-4': t.term4
+            };
+
+            for(let id in map) if(document.getElementById(id)) document.getElementById(id).innerHTML = map[id];
+        }
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'ar' ? 'en' : 'ar';
+            localStorage.setItem('hfit_lang', currentLang);
+            applyTranslations();
+        }
+
+        function openModal(id) { document.getElementById(id).classList.add('active'); document.body.style.overflow = 'hidden'; }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); document.body.style.overflow = 'auto'; }
+        window.onclick = function(event) { if (event.target.classList.contains('modal')) { event.target.classList.remove('active'); document.body.style.overflow = 'auto'; } }
+        
+        function selectPlan(type) {
+            const price = type === 'premium' ? 3 : 1;
+            localStorage.setItem('hfit_plan_type', type);
+            localStorage.setItem('hfit_plan_price', price);
+            window.location.href = "payment.html";
+        }
+
+        async function rate(stars) {
+            const starsContainer = document.getElementById('stars-container');
+            const icons = starsContainer.getElementsByTagName('i');
+            for (let i = 0; i < 5; i++) {
+                if (i < stars) { icons[i].classList.remove('fa-regular'); icons[i].classList.add('fa-solid', 'active'); }
+                else { icons[i].classList.remove('fa-solid', 'active'); icons[i].classList.add('fa-regular'); }
+            }
+            
+            const t = tDB[currentLang];
+            document.getElementById('rating-result').classList.remove('hidden');
+            document.getElementById('rating-text').innerText = t.ratingDone;
+            document.getElementById('rating-result').innerText = `(${stars}/5)`;
+
+            if (_supabase) {
+                try {
+                    await _supabase.from('app_ratings').insert([{ stars: stars }]);
+                    console.log("Rating saved to DB");
+                } catch (e) {
+                    console.log("Error saving rating:", e);
+                }
+            } else {
+                console.log("Supabase not connected!");
+            }
+            
+            localStorage.setItem('hfit_user_rating', stars);
+        }
+
+        window.onload = function() {
+            applyTranslations(); 
+            const savedRating = localStorage.getItem('hfit_user_rating');
+            if(savedRating) { rate(savedRating); }
+        }
+    </script>
+</body>
+</html>
