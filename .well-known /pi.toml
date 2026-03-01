@@ -4,15 +4,15 @@ HORIZON_URL="https://api.testnet.minepi.com"
 
 # Organization Info
 ORG_NAME="HFIT"
-ORG_URL="https://unrivaled-fenglisu-f6d8aa.netlify.app"
-ORG_DESCRIPTION=".HFIT token on Pi Testnet for To rewards and then exchange them for Pi Network currency to users"
+ORG_URL="https://hfit-pi-token.netlify.app"
+ORG_DESCRIPTION="HFIT token on Pi Testnet to reward users and exchange them for Pi Network currency."
 ORG_LOGO="https://hfit-pi-token.netlify.app/token_512.png"
 
 # Token Info
 [[CURRENCIES]]
 code="HFIT"
-issuer="GAEQ63XXLJ44H3TVC4OQGVIPLQRCUHEHI6FULRABW5UCDF3ZN2U2JYGW"
+issuer="GA3TTKNLKORK67JQU2DC3PFGLZZR2EYST47V3J2V5SNLVEQHE4KMWHNH"
 display_decimals=7
 name="HFIT Token"
-desc=".HFIT token on Pi Testnet for To rewards and then exchange them for Pi Network currency to users"
+desc="HFIT token on Pi Testnet to reward users and exchange them for Pi Network currency."
 image="https://hfit-pi-token.netlify.app/token_512.png"
