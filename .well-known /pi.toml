@@ -4,9 +4,9 @@ HORIZON_URL="https://api.testnet.minepi.com"
 
 # Organization Info
 ORG_NAME="HFIT"
-ORG_URL="https://hfit-pi-token.netlify.app"
+ORG_URL="https://hfit-mainnet.netlify.app/"
 ORG_DESCRIPTION="HFIT token on Pi Testnet to reward users and exchange them for Pi Network currency."
-ORG_LOGO="https://hfit-pi-token.netlify.app/token_512.png"
+ORG_LOGO="https://hfit-mainnet.netlify.app/token_512.png"
 
 # Token Info
 [[CURRENCIES]]
@@ -15,4 +15,4 @@ issuer="GA3TTKNLKORK67JQU2DC3PFGLZZR2EYST47V3J2V5SNLVEQHE4KMWHNH"
 display_decimals=7
 name="HFIT Token"
 desc="HFIT token on Pi Testnet to reward users and exchange them for Pi Network currency."
-image="https://hfit-pi-token.netlify.app/token_512.png"
+image="https://hfit-mainnet.netlify.app/token_512.png"
