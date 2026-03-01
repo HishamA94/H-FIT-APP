@@ -4,7 +4,7 @@ HORIZON_URL="https://api.testnet.minepi.com"
 
 # Organization Info
 ORG_NAME="HFIT"
-ORG_URL="https://hfit-mainnet.netlify.app/"
+ORG_URL="https://hfit-mainnet.netlify.app"
 ORG_DESCRIPTION="HFIT token on Pi Testnet to reward users and exchange them for Pi Network currency."
 ORG_LOGO="https://hfit-mainnet.netlify.app/token_512.png"
 
